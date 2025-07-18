@@ -8,7 +8,6 @@ import (
 func DefaultTechOptions() RouterOption {
 	return RouterOptions(
 		WithRecover(),
-
 		WithDebugHandler(),
 	)
 }

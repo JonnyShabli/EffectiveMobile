@@ -3,8 +3,11 @@ package http
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
+
+	"EffectiveMobile/pkg/logster"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -24,16 +27,18 @@ func NewHandler(basePath string, opts ...RouterOption) http.Handler {
 	return baseRouter
 }
 
-func NewServer(addr string, handler http.Handler) *http.Server {
+func NewServer(addr string, logger logster.Logger, handler http.Handler) *http.Server {
 	return &http.Server{
 		Addr:              addr,
 		Handler:           handler,
+		ErrorLog:          log.New(logger, "", 0),
 		ReadHeaderTimeout: defaultReadHeaderTimeout,
 	}
 }
 
-func RunServer(ctx context.Context, addr string, handler http.Handler) error {
-	server := NewServer(addr, handler)
+func RunServer(ctx context.Context, addr string, logger logster.Logger, handler http.Handler) error {
+	logger.WithField("address", addr).Infof("Starting http server")
+	server := NewServer(addr, logger, handler)
 	errListen := make(chan error, 1)
 	go func() {
 		errListen <- server.ListenAndServe()

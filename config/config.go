@@ -4,15 +4,19 @@ import (
 	"os"
 	"time"
 
+	"EffectiveMobile/pkg/logster"
+
 	"gopkg.in/yaml.v2"
 )
 
 type Config struct {
-	HTTPClient
+	HTTPClient `yaml:"httpClient"`
+	Log        logster.Config `yaml:"log"`
 }
 
 type HTTPClient struct {
-	Timeout time.Duration `yaml:"timeout"`
+	Timeout     time.Duration `yaml:"timeout"`
+	PrivateAddr string        `yaml:"privateAddr"`
 }
 
 func LoadConfig(filename string, cfg interface{}) error {
