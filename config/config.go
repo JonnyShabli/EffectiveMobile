@@ -4,14 +4,16 @@ import (
 	"os"
 	"time"
 
-	"EffectiveMobile/pkg/logster"
+	"github.com/JonnyShabli/EffectiveMobile/pkg/logster"
+	"github.com/JonnyShabli/EffectiveMobile/pkg/postgres"
 
 	"gopkg.in/yaml.v2"
 )
 
 type Config struct {
 	HTTPClient `yaml:"httpClient"`
-	Log        logster.Config `yaml:"log"`
+	Log        logster.Config  `yaml:"log"`
+	db         postgres.Config `yaml:"db"`
 }
 
 type HTTPClient struct {

@@ -1,11 +1,13 @@
 package main
 
 import (
+	"errors"
 	"os"
 
-	"EffectiveMobile/config"
-	pkghttp "EffectiveMobile/pkg/http"
-	"EffectiveMobile/pkg/logster"
+	"github.com/JonnyShabli/EffectiveMobile/config"
+	pkghttp "github.com/JonnyShabli/EffectiveMobile/pkg/http"
+	"github.com/JonnyShabli/EffectiveMobile/pkg/logster"
+	"github.com/JonnyShabli/EffectiveMobile/pkg/sig"
 
 	"context"
 	"flag"
@@ -34,6 +36,13 @@ func main() {
 	// создаем errgroup
 	g, ctx := errgroup.WithContext(context.Background())
 
+	// Gracefully shutdown
+	g.Go(func() error {
+		return sig.ListenSignal(ctx, logger)
+	})
+
+	logger.Infof("service starting with config %+v", appConfig)
+
 	// создаем технический хэндлер(debug и recoverer)
 	techHandler := pkghttp.NewHandler("/", pkghttp.DefaultTechOptions())
 
@@ -46,6 +55,7 @@ func main() {
 
 	// ждем завершения
 	err = g.Wait()
-	logger.Infof("error: %v", err)
-
+	if err != nil && !errors.Is(err, sig.ErrSignalReceived) {
+		logger.WithError(err).Errorf("Exit reason")
+	}
 }

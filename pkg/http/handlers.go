@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"EffectiveMobile/pkg/logster"
+	"github.com/JonnyShabli/EffectiveMobile/pkg/logster"
 
 	"github.com/go-chi/chi/v5"
 )

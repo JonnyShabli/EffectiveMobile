@@ -12,18 +12,6 @@ type ZapAdapter struct {
 	*zap.SugaredLogger
 }
 
-//func (z *ZapAdapter) Printf(format string, args ...interface{}) {
-//	z.Infof(format, args...)
-//}
-//
-//func (z *ZapAdapter) Print(args ...interface{}) {
-//	z.Info(args...)
-//}
-//
-//func (z *ZapAdapter) Println(args ...interface{}) {
-//	z.Info(args...)
-//}
-
 func (z *ZapAdapter) WithPrefix(prefix string) Logger {
 	return &ZapAdapter{SugaredLogger: z.SugaredLogger, prefix: prefix}
 }
@@ -31,14 +19,6 @@ func (z *ZapAdapter) WithPrefix(prefix string) Logger {
 func (z *ZapAdapter) WithField(key string, value interface{}) Logger {
 	return z.with(z.prefix+key, value)
 }
-
-//func (z *ZapAdapter) WithFields(fields Fields) Logger {
-//	s := make([]interface{}, 0, len(fields))
-//	for k, v := range fields {
-//		s = append(s, z.prefix+k, v)
-//	}
-//	return z.with(s...)
-//}
 
 func (z *ZapAdapter) WithError(err error) Logger {
 	if err != nil {
