@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS subscriptions
 (
     service_name        VARCHAR(50)        NOT NULL,
     price               INTEGER            NULL,
-    user_id             VARCHAR(50         NOT NULL,
+    user_id             VARCHAR(16)        NOT NULL,
     start_date          DATE               NOT NULL,
 
     created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
