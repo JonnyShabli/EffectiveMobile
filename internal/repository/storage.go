@@ -14,7 +14,7 @@ type StorageInterface interface {
 	InsertSub(ctx context.Context, log logster.Logger, sub *models.Subscription) (string, error)
 	GetSub(ctx context.Context, log logster.Logger, name string, userId string) ([]*models.Subscription, error)
 	UpdateSub(ctx context.Context, log logster.Logger, sub *models.Subscription) error
-	DeleteSub(ctx context.Context, log logster.Logger, sub *models.Subscription) error
+	DeleteSub(ctx context.Context, log logster.Logger, sub_id string) error
 	ListSub(ctx context.Context, log logster.Logger) ([]*models.Subscription, error)
 }
 
@@ -86,9 +86,9 @@ func (s *Storage) UpdateSub(ctx context.Context, log logster.Logger, sub *models
 	return err
 }
 
-func (s *Storage) DeleteSub(ctx context.Context, log logster.Logger, sub *models.Subscription) error {
+func (s *Storage) DeleteSub(ctx context.Context, log logster.Logger, sub_id string) error {
 	builder := squirrel.Delete("subscriptions").
-		Where(squirrel.Eq{"service_name": sub.Service_name, "user_id": sub.User_id})
+		Where(squirrel.Eq{"sub_id": sub_id})
 
 	sqlstring, args, err := builder.PlaceholderFormat(squirrel.Dollar).ToSql()
 	if err != nil {

@@ -1,6 +1,7 @@
--- +migrate Up
+-- +goose Up
 CREATE TABLE IF NOT EXISTS subscriptions
 (
+    sub_id              BIGINT
     service_name        VARCHAR(50)        NOT NULL,
     price               INTEGER            NULL,
     user_id             VARCHAR(16)        NOT NULL,
@@ -12,6 +13,5 @@ CREATE TABLE IF NOT EXISTS subscriptions
 
     PRIMARY KEY (service_name, user_id)
     );
--- +migrate Down
+-- +goose Down
 DROP TABLE IF EXISTS subscriptions;
--- DROP SCHEMA quant CASCADE;

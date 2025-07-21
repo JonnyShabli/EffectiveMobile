@@ -12,8 +12,8 @@ type Subscription struct {
 }
 
 type SubscriptionDTO struct {
-	price        int    `json:"price" db:"price"`
-	service_name string `json:"service_name" db:"service_name"`
-	user_id      string `json:"user_id" db:"user_id"`
-	start_date   string `json:"start_date" db:"start_date"`
+	Price        int    `json:"price" db:"price"`
+	Service_name string `json:"service_name" db:"service_name"`
+	User_id      string `json:"user_id" db:"user_id"`
+	Start_date   string `json:"start_date" db:"start_date"`
 }
