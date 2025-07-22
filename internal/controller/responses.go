@@ -7,7 +7,7 @@ import (
 	"github.com/JonnyShabli/EffectiveMobile/pkg/logster"
 )
 
-type response struct {
+type Response struct {
 	Msg  string      `json:"msg"`
 	Data interface{} `json:"data"`
 }
@@ -18,7 +18,7 @@ func SuccessResponse(w http.ResponseWriter, log logster.Logger, msg string, data
 	if data == nil {
 		data = ""
 	}
-	resp := response{
+	resp := Response{
 		Msg:  msg,
 		Data: data,
 	}
@@ -37,7 +37,7 @@ func BadRequestResponse(w http.ResponseWriter, log logster.Logger, errMsg string
 	if data == nil {
 		data = ""
 	}
-	resp := response{
+	resp := Response{
 		Msg:  errMsg,
 		Data: data,
 	}
@@ -57,7 +57,7 @@ func ErrorResponse(w http.ResponseWriter, log logster.Logger, errMsg string, dat
 	if data == nil {
 		data = ""
 	}
-	resp := response{
+	resp := Response{
 		Msg:  errMsg,
 		Data: data,
 	}

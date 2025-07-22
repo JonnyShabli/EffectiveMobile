@@ -14,6 +14,8 @@ import (
 	"github.com/JonnyShabli/EffectiveMobile/pkg/sig"
 	"github.com/joho/godotenv"
 
+	_ "github.com/JonnyShabli/EffectiveMobile/docs"
+
 	"context"
 	"flag"
 

@@ -11,7 +11,14 @@ import (
 	"github.com/JonnyShabli/EffectiveMobile/internal/service"
 	"github.com/JonnyShabli/EffectiveMobile/pkg/logster"
 	"github.com/go-chi/chi/v5"
+
+	_ "github.com/JonnyShabli/EffectiveMobile/docs"
 )
+
+// @title EffectiveMobile test task
+// @version         1.0
+// @description     Тестовое задание
+// @BasePath  /api/subs
 
 type SubsHandlerInterface interface {
 	InsertSub(w http.ResponseWriter, r *http.Request)
@@ -33,6 +40,16 @@ type SubsHandler struct {
 	Log     logster.Logger
 }
 
+// @Summary 		Добавление информации о подписке
+// @Description 	Добавление информации о подписке
+// @Tags 			Insert
+// @Accept			json
+// @Produce 		json
+// @Param			subscription body models.SubscriptionDTO true "subscription struct"
+// @Success 		200		{object}	Response
+// @Failure			400		{object}	Response
+// @Failure			500		{object}	Response
+// @Router 			/	[post]
 func (s *SubsHandler) InsertSub(w http.ResponseWriter, r *http.Request) {
 	var subDTO models.SubscriptionDTO
 	ctx := r.Context()
@@ -68,6 +85,16 @@ func (s *SubsHandler) InsertSub(w http.ResponseWriter, r *http.Request) {
 	s.Log.Infof("insert sub success")
 }
 
+// @Summary 		Добавление информации о подписке
+// @Description 	Добавление информации о подписке
+// @Tags 			Get
+// @Accept			json
+// @Produce 		json
+// @Param			sub_id path int true "subscription ID"
+// @Success 		200		{object}	Response
+// @Failure			400		{object}	Response
+// @Failure			500		{object}	Response
+// @Router 			/{sub_id}	[get]
 func (s *SubsHandler) GetSub(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	subId := chi.URLParam(r, "sub_id")
@@ -94,6 +121,16 @@ func (s *SubsHandler) GetSub(w http.ResponseWriter, r *http.Request) {
 	s.Log.Infof("get sub success")
 }
 
+// @Summary 		Обновление информации о подписке
+// @Description 	Обновление информации о подписке
+// @Tags 			Update
+// @Accept			json
+// @Produce 		json
+// @Param			subscription body models.SubscriptionDTO true "subscription struct"
+// @Success 		200		{object}	Response
+// @Failure			400		{object}	Response
+// @Failure			500		{object}	Response
+// @Router 			/	[put]
 func (s *SubsHandler) UpdateSub(w http.ResponseWriter, r *http.Request) {
 	var subDTO models.SubscriptionDTO
 	ctx := r.Context()
@@ -124,6 +161,16 @@ func (s *SubsHandler) UpdateSub(w http.ResponseWriter, r *http.Request) {
 	s.Log.Infof("update sub success")
 }
 
+// @Summary 		Удаление информации о подписке
+// @Description 	Удаление информации о подписке
+// @Tags 			Delete
+// @Accept			json
+// @Produce 		json
+// @Param			sub_id path int true "subscription ID"
+// @Success 		200		{object}	Response
+// @Failure			400		{object}	Response
+// @Failure			500		{object}	Response
+// @Router 			/{sub_id}	[delete]
 func (s *SubsHandler) DeleteSub(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	subId := chi.URLParam(r, "sub_id")
@@ -144,6 +191,15 @@ func (s *SubsHandler) DeleteSub(w http.ResponseWriter, r *http.Request) {
 	s.Log.Infof("delete sub success")
 }
 
+// @Summary 		Получение списка подписок
+// @Description 	Получение списка подписок
+// @Tags 			List
+// @Accept			json
+// @Produce 		json
+// @Success 		200		{object}	Response
+// @Failure			400		{object}	Response
+// @Failure			500		{object}	Response
+// @Router 			/list	[get]
 func (s *SubsHandler) ListSub(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 

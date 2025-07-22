@@ -3,12 +3,14 @@ package http
 import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 func DefaultTechOptions() RouterOption {
 	return RouterOptions(
 		WithRecover(),
 		WithDebugHandler(),
+		WithSwagger(),
 	)
 }
 
@@ -22,12 +24,6 @@ func RouterOptions(options ...RouterOption) func(chi.Router) {
 
 type RouterOption func(chi.Router)
 
-func WithApiHandler() RouterOption {
-	return func(r chi.Router) {
-
-	}
-}
-
 func WithDebugHandler() RouterOption {
 	return func(r chi.Router) {
 		r.Mount("/debug", middleware.Profiler())
@@ -38,5 +34,13 @@ func WithDebugHandler() RouterOption {
 func WithRecover() RouterOption {
 	return func(r chi.Router) {
 		r.Use(middleware.Recoverer)
+	}
+}
+
+func WithSwagger() RouterOption {
+	return func(r chi.Router) {
+		r.Get("/swagger/*", httpSwagger.Handler(
+			httpSwagger.URL("http://localhost:8080/swagger/doc.json"), //The url pointing to API definition
+		))
 	}
 }

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/JonnyShabli/EffectiveMobile/internal/models"
@@ -101,9 +102,16 @@ func (s *Storage) DeleteSub(ctx context.Context, log logster.Logger, subId strin
 
 	log.WithField("sql", sqlstring).Infof("executing query")
 
-	_, err = s.db.ExecContext(ctx, sqlstring, args...)
+	result, err := s.db.ExecContext(ctx, sqlstring, args...)
 	if err != nil {
 		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
 	}
 	return err
 }
