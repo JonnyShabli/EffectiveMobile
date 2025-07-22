@@ -1,6 +1,7 @@
 package http
 
 import (
+	"github.com/JonnyShabli/EffectiveMobile/pkg/logster"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	httpSwagger "github.com/swaggo/http-swagger"
@@ -34,6 +35,13 @@ func WithDebugHandler() RouterOption {
 func WithRecover() RouterOption {
 	return func(r chi.Router) {
 		r.Use(middleware.Recoverer)
+	}
+}
+
+func WithLoger(loger logster.Logger) RouterOption {
+	return func(r chi.Router) {
+
+		r.Use(logster.LogsterMiddleware(loger))
 	}
 }
 

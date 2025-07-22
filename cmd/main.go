@@ -62,7 +62,7 @@ func main() {
 	subController := controller.NewSubsHandler(subService, logger)
 
 	// создаем хэндлер
-	handler := pkghttp.NewHandler("/", pkghttp.DefaultTechOptions(), controller.WithApiHandler(subController))
+	handler := pkghttp.NewHandler("/", pkghttp.WithLoger(logger), pkghttp.DefaultTechOptions(), controller.WithApiHandler(subController))
 	logger.Infof("create and configure handler %+v", handler)
 
 	g.Go(func() error {
