@@ -3,56 +3,69 @@ package controller
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/JonnyShabli/EffectiveMobile/pkg/logster"
 )
 
 type response struct {
-	msg    string
-	data   interface{}
-	errMsg string
+	Msg  string      `json:"msg"`
+	Data interface{} `json:"data"`
 }
 
-func SuccessResponse(w http.ResponseWriter, msg string, data interface{}, errMsg string) {
+func SuccessResponse(w http.ResponseWriter, log logster.Logger, msg string, data interface{}) {
 	w.Header().Set("Content-Type", "application/json;charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	resp := response{
-		msg:    msg,
-		data:   data,
-		errMsg: errMsg,
+	if data == nil {
+		data = ""
 	}
+	resp := response{
+		Msg:  msg,
+		Data: data,
+	}
+
 	err := json.NewEncoder(w).Encode(resp)
 	if err != nil {
 		http.Error(w, "Failed to encode JSON response", http.StatusInternalServerError)
+		log.WithError(err).Errorf("json encode error")
 		return
 	}
 }
 
-func BadRequestResponse(w http.ResponseWriter, msg string, data interface{}, errMsg string) {
+func BadRequestResponse(w http.ResponseWriter, log logster.Logger, errMsg string, data interface{}) {
 	w.Header().Set("Content-Type", "application/json;charset=utf-8")
 	w.WriteHeader(http.StatusBadRequest)
+	if data == nil {
+		data = ""
+	}
 	resp := response{
-		msg:    msg,
-		data:   data,
-		errMsg: errMsg,
+		Msg:  errMsg,
+		Data: data,
 	}
 
 	err := json.NewEncoder(w).Encode(resp)
 	if err != nil {
 		http.Error(w, "Failed to encode JSON response", http.StatusInternalServerError)
+		log.WithError(err).Errorf("json encode error")
 		return
 	}
+
 }
 
-func ErrorResponse(w http.ResponseWriter, msg string, data interface{}, errMsg string) {
+func ErrorResponse(w http.ResponseWriter, log logster.Logger, errMsg string, data interface{}) {
 	w.Header().Set("Content-Type", "application/json;charset=utf-8")
 	w.WriteHeader(http.StatusInternalServerError)
+	if data == nil {
+		data = ""
+	}
 	resp := response{
-		msg:    msg,
-		data:   data,
-		errMsg: errMsg,
+		Msg:  errMsg,
+		Data: data,
 	}
 	err := json.NewEncoder(w).Encode(resp)
 	if err != nil {
 		http.Error(w, "Failed to encode JSON response", http.StatusInternalServerError)
+		log.WithError(err).Errorf("json encode error")
 		return
 	}
+
 }

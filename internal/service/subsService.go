@@ -10,7 +10,7 @@ import (
 
 type SubsServiceInterface interface {
 	InsertSub(ctx context.Context, log logster.Logger, sub *models.Subscription) (string, error)
-	GetSub(ctx context.Context, log logster.Logger, name string, userId string) ([]*models.Subscription, error)
+	GetSub(ctx context.Context, log logster.Logger, subId string) ([]*models.Subscription, error)
 	UpdateSub(ctx context.Context, log logster.Logger, sub *models.Subscription) error
 	DeleteSub(ctx context.Context, log logster.Logger, sub_id string) error
 	ListSub(ctx context.Context, log logster.Logger) ([]*models.Subscription, error)
@@ -32,8 +32,8 @@ func (s *SubsService) InsertSub(ctx context.Context, log logster.Logger, sub *mo
 	return id, nil
 }
 
-func (s *SubsService) GetSub(ctx context.Context, log logster.Logger, name string, userId string) ([]*models.Subscription, error) {
-	subs, err := s.db.GetSub(ctx, log, name, userId)
+func (s *SubsService) GetSub(ctx context.Context, log logster.Logger, subId string) ([]*models.Subscription, error) {
+	subs, err := s.db.GetSub(ctx, log, subId)
 	if err != nil {
 		return nil, err
 	}

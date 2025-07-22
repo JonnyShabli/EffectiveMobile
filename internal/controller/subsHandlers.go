@@ -38,12 +38,15 @@ func (s *SubsHandler) InsertSub(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	reqBody, err := io.ReadAll(r.Body)
 	if err != nil {
-		BadRequestResponse(w, "fail read request body", nil, err.Error())
+		s.Log.WithError(err).Infof("fail read request body")
+		BadRequestResponse(w, s.Log, "fail read request body", "")
 		return
 	}
 	err = json.Unmarshal(reqBody, &subDTO)
 	if err != nil {
-		BadRequestResponse(w, "json.Unmarshal", subDTO, err.Error())
+		err = fmt.Errorf("fail to unmarshal request body '%w'", err)
+		s.Log.WithError(err).Infof("fail to unmarshal request body")
+		BadRequestResponse(w, s.Log, err.Error(), "")
 		return
 	}
 	sub := dtoToSub(&subDTO)
@@ -52,39 +55,43 @@ func (s *SubsHandler) InsertSub(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if strings.Contains(err.Error(), "duplicate key value") {
 			err = fmt.Errorf("duplicate key value %w", err)
-			BadRequestResponse(w, "duplicate key value", nil, err.Error())
+			BadRequestResponse(w, s.Log, err.Error(), "")
+			s.Log.WithError(err).Infof("duplicate key value")
 			return
 		}
-
-		ErrorResponse(w, "Service.InsertSub error", nil, err.Error())
+		s.Log.WithError(err).Errorf("insert sub fail")
+		ErrorResponse(w, s.Log, fmt.Errorf("insert sub fail %w", err).Error(), "")
 		return
 	}
 
-	SuccessResponse(w, "success", sub_id, "")
+	SuccessResponse(w, s.Log, "success", sub_id)
+	s.Log.Infof("insert sub success")
 }
 
 func (s *SubsHandler) GetSub(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	serviceName := chi.URLParam(r, "service_name")
-	userId := chi.URLParam(r, "user_id")
-	if serviceName == "" && userId == "" {
-		BadRequestResponse(w, "bad params", nil, "")
+	subId := chi.URLParam(r, "sub_id")
+	if subId == "" {
+		s.Log.Infof("fail to get sub_id")
+		BadRequestResponse(w, s.Log, fmt.Errorf("fail to get sub_id").Error(), "")
 		return
 	}
-	subs, err := s.Service.GetSub(ctx, s.Log, serviceName, userId)
+	subs, err := s.Service.GetSub(ctx, s.Log, subId)
 	if err != nil {
 		if strings.Contains(err.Error(), "sql: no rows in result set") {
 			err = fmt.Errorf("sql: no rows in result set %w", err)
-			BadRequestResponse(w, "sql: no rows in result set", nil, err.Error())
+			s.Log.WithError(err).Infof("sql: no rows in result set")
+			BadRequestResponse(w, s.Log, err.Error(), "")
 			return
 		}
-
-		ErrorResponse(w, "Service.GetSub error", nil, err.Error())
+		s.Log.WithError(err).Errorf("get sub fail")
+		ErrorResponse(w, s.Log, fmt.Errorf("get sub fail %w", err).Error(), "")
 		return
 	}
 	result := subsToDTO(subs)
 
-	SuccessResponse(w, "success", result, "")
+	SuccessResponse(w, s.Log, "success", result)
+	s.Log.Infof("get sub success")
 }
 
 func (s *SubsHandler) UpdateSub(w http.ResponseWriter, r *http.Request) {
@@ -92,37 +99,49 @@ func (s *SubsHandler) UpdateSub(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	reqBody, err := io.ReadAll(r.Body)
 	if err != nil {
-		BadRequestResponse(w, "fail read request body", nil, err.Error())
+		err = fmt.Errorf("fail to read request body '%w'", err)
+		s.Log.WithError(err).Infof("fail to read request body")
+		BadRequestResponse(w, s.Log, err.Error(), "")
 		return
 	}
 	err = json.Unmarshal(reqBody, &subDTO)
 	if err != nil {
-		BadRequestResponse(w, "json.Unmarshal", subDTO, err.Error())
+		err = fmt.Errorf("fail to unmarshal request body '%w'", err)
+		s.Log.WithError(err).Infof("fail to unmarshal request body")
+		BadRequestResponse(w, s.Log, err.Error(), "")
 		return
 	}
 	sub := dtoToSub(&subDTO)
 
 	err = s.Service.UpdateSub(ctx, s.Log, sub)
 	if err != nil {
-		BadRequestResponse(w, "Service.UpdateSub error", sub, err.Error())
+		err = fmt.Errorf("update sub fail %w", err)
+		s.Log.WithError(err).Infof("update sub fail")
+		BadRequestResponse(w, s.Log, err.Error(), "")
 		return
 	}
-	SuccessResponse(w, "success", nil, "")
+	SuccessResponse(w, s.Log, "success", "")
+	s.Log.Infof("update sub success")
 }
 
 func (s *SubsHandler) DeleteSub(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	sub_id := chi.URLParam(r, "sub_id")
-	if sub_id == "" {
-		BadRequestResponse(w, "bad params", nil, "")
+	subId := chi.URLParam(r, "sub_id")
+	if subId == "" {
+		err := fmt.Errorf("fail to get sub_id")
+		s.Log.WithError(err).Infof("fail to get sub_id")
+		BadRequestResponse(w, s.Log, err.Error(), "")
 		return
 	}
-	err := s.Service.DeleteSub(ctx, s.Log, sub_id)
+	err := s.Service.DeleteSub(ctx, s.Log, subId)
 	if err != nil {
-		BadRequestResponse(w, "Service.DeleteSub error", sub_id, err.Error())
+		err = fmt.Errorf("delete sub fail %w", err)
+		s.Log.WithError(err).Infof("delete sub fail")
+		BadRequestResponse(w, s.Log, err.Error(), "")
 		return
 	}
-	SuccessResponse(w, "success", nil, "")
+	SuccessResponse(w, s.Log, "success", "")
+	s.Log.Infof("delete sub success")
 }
 
 func (s *SubsHandler) ListSub(w http.ResponseWriter, r *http.Request) {
@@ -132,21 +151,23 @@ func (s *SubsHandler) ListSub(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if strings.Contains(err.Error(), "sql: no rows in result set") {
 			err = fmt.Errorf("sql: no rows in result set %w", err)
-			BadRequestResponse(w, "sql: no rows in result set", nil, err.Error())
+			BadRequestResponse(w, s.Log, fmt.Errorf("sql: no rows in result set %w", err).Error(), "")
 			return
 		}
-
-		ErrorResponse(w, "Service.GetSub error", nil, err.Error())
+		s.Log.WithError(err).Errorf("list sub fail")
+		ErrorResponse(w, s.Log, fmt.Errorf("list sub fail %w", err).Error(), "")
 		return
 	}
 	result := subsToDTO(subs)
 
-	SuccessResponse(w, "success", result, "")
+	SuccessResponse(w, s.Log, "success", result)
+	s.Log.Infof("list sub success")
 
 }
 
 func dtoToSub(dto *models.SubscriptionDTO) *models.Subscription {
 	return &models.Subscription{
+		Sub_id:       dto.Sub_id,
 		Price:        dto.Price,
 		Service_name: dto.Service_name,
 		User_id:      dto.User_id,
@@ -155,14 +176,16 @@ func dtoToSub(dto *models.SubscriptionDTO) *models.Subscription {
 }
 
 func subsToDTO(subs []*models.Subscription) []*models.SubscriptionDTO {
-	result := make([]*models.SubscriptionDTO, len(subs))
+	result := make([]*models.SubscriptionDTO, 0, len(subs))
 	for _, sub := range subs {
 		result = append(result, &models.SubscriptionDTO{
+			Sub_id:       sub.Sub_id,
 			Price:        sub.Price,
 			Service_name: sub.Service_name,
 			User_id:      sub.User_id,
 			Start_date:   sub.Start_date,
 		})
 	}
+
 	return result
 }

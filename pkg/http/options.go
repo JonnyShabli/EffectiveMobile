@@ -22,6 +22,12 @@ func RouterOptions(options ...RouterOption) func(chi.Router) {
 
 type RouterOption func(chi.Router)
 
+func WithApiHandler() RouterOption {
+	return func(r chi.Router) {
+
+	}
+}
+
 func WithDebugHandler() RouterOption {
 	return func(r chi.Router) {
 		r.Mount("/debug", middleware.Profiler())

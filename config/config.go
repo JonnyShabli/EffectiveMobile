@@ -13,7 +13,7 @@ import (
 type Config struct {
 	HTTPClient `yaml:"httpClient"`
 	Log        logster.Config  `yaml:"log"`
-	db         postgres.Config `yaml:"db"`
+	DB         postgres.Config `yaml:"db"`
 }
 
 type HTTPClient struct {

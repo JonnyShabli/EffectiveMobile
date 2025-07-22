@@ -5,9 +5,14 @@ import (
 	"os"
 
 	"github.com/JonnyShabli/EffectiveMobile/config"
+	"github.com/JonnyShabli/EffectiveMobile/internal/controller"
+	"github.com/JonnyShabli/EffectiveMobile/internal/repository"
+	"github.com/JonnyShabli/EffectiveMobile/internal/service"
 	pkghttp "github.com/JonnyShabli/EffectiveMobile/pkg/http"
 	"github.com/JonnyShabli/EffectiveMobile/pkg/logster"
+	"github.com/JonnyShabli/EffectiveMobile/pkg/postgres"
 	"github.com/JonnyShabli/EffectiveMobile/pkg/sig"
+	"github.com/joho/godotenv"
 
 	"context"
 	"flag"
@@ -21,10 +26,15 @@ func main() {
 	var appConfig config.Config
 	var configFile string
 
+	err := godotenv.Load()
+	if err != nil {
+		panic(err)
+	}
+
 	// читаем флаги запуска
 	flag.StringVar(&configFile, "config", localConfig, "Path to the config file")
 	flag.Parse()
-	err := config.LoadConfig(configFile, &appConfig)
+	err = config.LoadConfig(configFile, &appConfig)
 	if err != nil {
 		panic(err)
 	}
@@ -43,12 +53,19 @@ func main() {
 
 	logger.Infof("service starting with config %+v", appConfig)
 
-	// создаем технический хэндлер(debug и recoverer)
-	techHandler := pkghttp.NewHandler("/", pkghttp.DefaultTechOptions())
+	// собираем зависимости
+	dbConn := postgres.NewConn(ctx, logger, appConfig.DB)
+	repo := repository.NewStorage(dbConn)
+	subService := service.NewSubsService(repo)
+	subController := controller.NewSubsHandler(subService, logger)
+
+	// создаем хэндлер
+	handler := pkghttp.NewHandler("/", pkghttp.DefaultTechOptions(), controller.WithApiHandler(subController))
+	logger.Infof("create and configure handler %+v", handler)
 
 	g.Go(func() error {
 		return logster.LogIfError(
-			logger, pkghttp.RunServer(ctx, appConfig.PrivateAddr, logger, techHandler),
+			logger, pkghttp.RunServer(ctx, appConfig.PrivateAddr, logger, handler),
 			"Tech server error",
 		)
 	})

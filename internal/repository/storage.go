@@ -12,7 +12,7 @@ import (
 
 type StorageInterface interface {
 	InsertSub(ctx context.Context, log logster.Logger, sub *models.Subscription) (string, error)
-	GetSub(ctx context.Context, log logster.Logger, name string, userId string) ([]*models.Subscription, error)
+	GetSub(ctx context.Context, log logster.Logger, subId string) ([]*models.Subscription, error)
 	UpdateSub(ctx context.Context, log logster.Logger, sub *models.Subscription) error
 	DeleteSub(ctx context.Context, log logster.Logger, sub_id string) error
 	ListSub(ctx context.Context, log logster.Logger) ([]*models.Subscription, error)
@@ -38,18 +38,20 @@ func (s *Storage) InsertSub(ctx context.Context, log logster.Logger, sub *models
 		return "", err
 	}
 	log.WithField("sql", sqlstring).Infof("executing query")
+
 	err = s.db.GetContext(ctx, &sub_id, sqlstring, args...)
 	if err != nil {
 		return "", err
 	}
+
 	return sub_id, nil
 }
 
-func (s *Storage) GetSub(ctx context.Context, log logster.Logger, name string, userId string) ([]*models.Subscription, error) {
+func (s *Storage) GetSub(ctx context.Context, log logster.Logger, subId string) ([]*models.Subscription, error) {
 	result := make([]*models.Subscription, 0)
-	builder := squirrel.Select("service_name", "price", "user_id", "start_date").
+	builder := squirrel.Select("sub_id", "service_name", "price", "user_id", "start_date").
 		From("subscriptions").
-		Where(squirrel.Eq{"service_name": name, "user_id": userId})
+		Where(squirrel.Eq{"sub_id": subId})
 	sqlstring, args, err := builder.PlaceholderFormat(squirrel.Dollar).ToSql()
 	if err != nil {
 		return nil, err
@@ -69,7 +71,8 @@ func (s *Storage) UpdateSub(ctx context.Context, log logster.Logger, sub *models
 		Set("user_id", sub.User_id).
 		Set("start_date", sub.Start_date).
 		Set("updated_at", time.Now()).
-		Where(squirrel.Eq{"service_name": sub.Service_name, "user_id": sub.User_id})
+		Set("deleted_at", sub.Deleted_at).
+		Where(squirrel.Eq{"sub_id": sub.Sub_id})
 
 	sqlstring, args, err := builder.PlaceholderFormat(squirrel.Dollar).ToSql()
 	if err != nil {
@@ -86,9 +89,10 @@ func (s *Storage) UpdateSub(ctx context.Context, log logster.Logger, sub *models
 	return err
 }
 
-func (s *Storage) DeleteSub(ctx context.Context, log logster.Logger, sub_id string) error {
-	builder := squirrel.Delete("subscriptions").
-		Where(squirrel.Eq{"sub_id": sub_id})
+func (s *Storage) DeleteSub(ctx context.Context, log logster.Logger, subId string) error {
+	builder := squirrel.Update("subscriptions").
+		Set("deleted_at", time.Now()).
+		Where(squirrel.Eq{"sub_id": subId})
 
 	sqlstring, args, err := builder.PlaceholderFormat(squirrel.Dollar).ToSql()
 	if err != nil {
@@ -107,7 +111,8 @@ func (s *Storage) DeleteSub(ctx context.Context, log logster.Logger, sub_id stri
 func (s *Storage) ListSub(ctx context.Context, log logster.Logger) ([]*models.Subscription, error) {
 	result := make([]*models.Subscription, 0)
 	builder := squirrel.Select("*").
-		From("subscriptions")
+		From("subscriptions").
+		Where(squirrel.Eq{"deleted_at": nil})
 
 	sqlstring, args, err := builder.PlaceholderFormat(squirrel.Dollar).ToSql()
 	if err != nil {

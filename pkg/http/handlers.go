@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/JonnyShabli/EffectiveMobile/pkg/logster"
-
 	"github.com/go-chi/chi/v5"
 )
 
