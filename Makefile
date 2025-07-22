@@ -1,3 +1,3 @@
 swagger-gen:
-	swag init --parseDependency --parseDependencyLevel 0  --generalInfo ./internal/controller/subsHandlers.go
+	swag init --outputTypes json --generalInfo ./internal/controller/subsHandlers.go
 .PHONY: swagger-gen
