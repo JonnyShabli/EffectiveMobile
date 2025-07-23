@@ -65,6 +65,15 @@ func main() {
 	handler := pkghttp.NewHandler("/", pkghttp.WithLoger(logger), pkghttp.DefaultTechOptions(), controller.WithApiHandler(subController))
 	logger.Infof("create and configure handler %+v", handler)
 
+	if appConfig.DB.Migrate {
+		g.Go(func() error {
+			return logster.LogIfError(
+				logger, postgres.MigrateDB(ctx, dbConn.DB, logger), "migration error")
+		})
+	} else {
+		logger.Infof("migration disabled by config: migrate = %+v", appConfig.DB.Migrate)
+	}
+
 	g.Go(func() error {
 		return logster.LogIfError(
 			logger, pkghttp.RunServer(ctx, appConfig.PrivateAddr, logger, handler),

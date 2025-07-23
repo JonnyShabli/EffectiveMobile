@@ -21,5 +21,6 @@ type Logger interface {
 	Fatalf(format string, args ...interface{})
 	Panicf(format string, args ...interface{})
 
-	Write(p []byte) (n int, err error) // http/server logs interface
+	Printf(format string, args ...interface{}) // goose logger interface
+	Write(p []byte) (n int, err error)         // http/server logs interface
 }

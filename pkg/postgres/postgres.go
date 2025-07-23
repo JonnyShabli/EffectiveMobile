@@ -2,12 +2,15 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
+	_ "github.com/JonnyShabli/EffectiveMobile/migrations"
 	"github.com/JonnyShabli/EffectiveMobile/pkg/logster"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"github.com/pressly/goose/v3"
 )
 
 type Config struct {
@@ -16,6 +19,8 @@ type Config struct {
 	Host     string `yaml:"host"`
 	Port     string `yaml:"port"`
 	Database string `yaml:"database"`
+	Dialect  string `yaml:"dialect"`
+	Migrate  bool   `yaml:"migrate"`
 
 	MinConnections    int           `yaml:"minConnections"`
 	MaxConnections    int           `yaml:"maxConnections"`
@@ -46,7 +51,14 @@ func NewConn(ctx context.Context, log logster.Logger, config Config) *sqlx.DB {
 	return db
 }
 
-func InitDB(db *sqlx.DB) error {
-	panic("not implemented")
+func MigrateDB(ctx context.Context, db *sql.DB, logger logster.Logger) error {
+	goose.SetLogger(logger)
+	logger.Infof("apply migrations")
+	err := goose.UpContext(ctx, db, ".")
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

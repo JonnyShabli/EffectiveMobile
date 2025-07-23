@@ -12,6 +12,10 @@ type ZapAdapter struct {
 	*zap.SugaredLogger
 }
 
+func (z *ZapAdapter) Printf(format string, args ...interface{}) {
+	z.Infof(format, args...)
+}
+
 func (z *ZapAdapter) WithPrefix(prefix string) Logger {
 	return &ZapAdapter{SugaredLogger: z.SugaredLogger, prefix: prefix}
 }
