@@ -14,6 +14,7 @@ type SubsServiceInterface interface {
 	UpdateSub(ctx context.Context, log logster.Logger, sub *models.Subscription) error
 	DeleteSub(ctx context.Context, log logster.Logger, sub_id string) error
 	ListSub(ctx context.Context, log logster.Logger) ([]*models.Subscription, error)
+	SumPriceByDate(ctx context.Context, log logster.Logger, params *models.SumPriceRequest) (int, error)
 }
 
 type SubsService struct {
@@ -54,4 +55,8 @@ func (s *SubsService) ListSub(ctx context.Context, log logster.Logger) ([]*model
 		return nil, err
 	}
 	return subs, nil
+}
+
+func (s *SubsService) SumPriceByDate(ctx context.Context, log logster.Logger, params *models.SumPriceRequest) (int, error) {
+	return s.db.SumPriceByDate(ctx, log, params)
 }

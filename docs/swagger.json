@@ -133,6 +133,52 @@
                 }
             }
         },
+        "/sumPriceByDate": {
+            "get": {
+                "description": "За выбранный период с фильтрацией по id пользователя и названию подписки",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SumPriceByDate"
+                ],
+                "summary": "Подсчет суммарной стоимости всех подписок",
+                "parameters": [
+                    {
+                        "description": "request struct",
+                        "name": "SumPriceRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SumPriceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controller.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/{sub_id}": {
             "get": {
                 "description": "Добавление информации о подписке",
@@ -244,6 +290,23 @@
                 },
                 "sub_id": {
                     "type": "integer"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.SumPriceRequest": {
+            "type": "object",
+            "properties": {
+                "end_date": {
+                    "type": "string"
+                },
+                "service_name": {
+                    "type": "string"
+                },
+                "start_date": {
+                    "type": "string"
                 },
                 "user_id": {
                     "type": "string"

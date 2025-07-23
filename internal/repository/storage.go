@@ -17,6 +17,7 @@ type StorageInterface interface {
 	UpdateSub(ctx context.Context, log logster.Logger, sub *models.Subscription) error
 	DeleteSub(ctx context.Context, log logster.Logger, sub_id string) error
 	ListSub(ctx context.Context, log logster.Logger) ([]*models.Subscription, error)
+	SumPriceByDate(ctx context.Context, log logster.Logger, params *models.SumPriceRequest) (int, error)
 }
 
 type Storage struct {
@@ -135,4 +136,34 @@ func (s *Storage) ListSub(ctx context.Context, log logster.Logger) ([]*models.Su
 	}
 
 	return result, nil
+}
+
+func (s *Storage) SumPriceByDate(ctx context.Context, log logster.Logger, params *models.SumPriceRequest) (int, error) {
+	var sum int
+
+	builder := squirrel.Select("COALESCE(SUM(price), 0) as total").
+		From("subscriptions").
+		Where(squirrel.And{
+			squirrel.Expr("start_date BETWEEN ? AND ?", params.Start_date, params.End_date),
+			squirrel.Eq{"deleted_at": nil},
+		})
+	if params.User_id != "" {
+		builder = builder.Where(squirrel.Eq{"user_id": params.User_id})
+	}
+	if params.Service_name != "" {
+		builder = builder.Where(squirrel.Eq{"service_name": params.Service_name})
+	}
+
+	sqlstring, args, err := builder.PlaceholderFormat(squirrel.Dollar).ToSql()
+	if err != nil {
+		return 0, err
+	}
+
+	log.WithField("sql", sqlstring).Infof("executing query")
+
+	err = s.db.GetContext(ctx, &sum, sqlstring, args...)
+	if err != nil {
+		return 0, err
+	}
+	return sum, nil
 }

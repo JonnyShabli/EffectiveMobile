@@ -13,6 +13,7 @@ func WithApiHandler(api SubsHandlerInterface) pkghttp.RouterOption {
 			r.Put("/", api.UpdateSub)
 			r.Delete("/{sub_id}", api.DeleteSub)
 			r.Get("/list", api.ListSub)
+			r.Get("/sumPriceByDate", api.SumPriceByDate)
 		})
 	}
 }

@@ -23,3 +23,10 @@ type SubscriptionDTO struct {
 	User_id      string `json:"user_id" db:"user_id"`
 	Start_date   string `json:"start_date" db:"start_date"`
 }
+
+type SumPriceRequest struct {
+	Service_name string `json:"service_name" db:"service_name"`
+	User_id      string `json:"user_id" db:"user_id"`
+	Start_date   string `json:"start_date" db:"start_date"`
+	End_date     string `json:"end_date" db:"end_date"`
+}

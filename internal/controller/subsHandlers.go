@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/JonnyShabli/EffectiveMobile/internal/models"
 	"github.com/JonnyShabli/EffectiveMobile/internal/service"
@@ -26,6 +27,7 @@ type SubsHandlerInterface interface {
 	UpdateSub(w http.ResponseWriter, r *http.Request)
 	DeleteSub(w http.ResponseWriter, r *http.Request)
 	ListSub(w http.ResponseWriter, r *http.Request)
+	SumPriceByDate(w http.ResponseWriter, r *http.Request)
 }
 
 func NewSubsHandler(service service.SubsServiceInterface, log logster.Logger) SubsHandlerInterface {
@@ -229,6 +231,62 @@ func dtoToSub(dto *models.SubscriptionDTO) *models.Subscription {
 		User_id:      dto.User_id,
 		Start_date:   dto.Start_date,
 	}
+}
+
+// @Summary 		Подсчет суммарной стоимости всех подписок
+// @Description 	За выбранный период с фильтрацией по id пользователя и названию подписки
+// @Tags 			SumPriceByDate
+// @Accept			json
+// @Produce 		json
+// @Param			SumPriceRequest body models.SumPriceRequest true "request struct"
+// @Success 		200		{object}	Response
+// @Failure			400		{object}	Response
+// @Failure			500		{object}	Response
+// @Router 			/sumPriceByDate	[get]
+func (s *SubsHandler) SumPriceByDate(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	var params models.SumPriceRequest
+	reqBody, err := io.ReadAll(r.Body)
+	if err != nil {
+		err = fmt.Errorf("fail to read request body '%w'", err)
+		s.Log.WithError(err).Infof("fail to read request body")
+		BadRequestResponse(w, s.Log, err.Error(), "")
+		return
+	}
+	err = json.Unmarshal(reqBody, &params)
+	if err != nil {
+		err = fmt.Errorf("fail to unmarshal request body '%w'", err)
+		s.Log.WithError(err).Infof("fail to unmarshal request body")
+		BadRequestResponse(w, s.Log, err.Error(), "")
+		return
+	}
+
+	start, err := time.Parse("01-2006", params.Start_date)
+	if err != nil {
+		err = fmt.Errorf("fail to parse start date '%w'", err)
+		s.Log.WithError(err).Infof("fail to parse start date")
+		BadRequestResponse(w, s.Log, err.Error(), "")
+		return
+	}
+	end, err := time.Parse("01-2006", params.End_date)
+	if err != nil {
+		err = fmt.Errorf("fail to parse end date '%w'", err)
+		s.Log.WithError(err).Infof("fail to parse end date")
+		BadRequestResponse(w, s.Log, err.Error(), "")
+		return
+	}
+
+	if end.Before(start) {
+		s.Log.Errorf("bad interval start = %v, end = %v", start, end)
+	}
+
+	sum, err := s.Service.SumPriceByDate(ctx, s.Log, &params)
+	if err != nil {
+		s.Log.WithError(err).Infof("fail to sum price by date")
+		BadRequestResponse(w, s.Log, err.Error(), "")
+		return
+	}
+	SuccessResponse(w, s.Log, "sum price by date", sum)
 }
 
 func subsToDTO(subs []*models.Subscription) []*models.SubscriptionDTO {
