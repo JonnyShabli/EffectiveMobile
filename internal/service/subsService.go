@@ -42,11 +42,14 @@ func (s *SubsService) GetSub(ctx context.Context, log logster.Logger, subId stri
 }
 
 func (s *SubsService) UpdateSub(ctx context.Context, log logster.Logger, sub *models.Subscription) error {
-	return s.db.UpdateSub(ctx, log, sub)
+	err := s.db.UpdateSub(ctx, log, sub)
+	return err
 }
 
 func (s *SubsService) DeleteSub(ctx context.Context, log logster.Logger, sub_id string) error {
-	return s.db.DeleteSub(ctx, log, sub_id)
+	err := s.db.DeleteSub(ctx, log, sub_id)
+
+	return err
 }
 
 func (s *SubsService) ListSub(ctx context.Context, log logster.Logger) ([]*models.Subscription, error) {

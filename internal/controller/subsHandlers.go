@@ -153,6 +153,7 @@ func (s *SubsHandler) UpdateSub(w http.ResponseWriter, r *http.Request) {
 	sub := dtoToSub(&subDTO)
 
 	err = s.Service.UpdateSub(ctx, s.Log, sub)
+
 	if err != nil {
 		err = fmt.Errorf("update sub fail %w", err)
 		s.Log.WithError(err).Infof("update sub fail")

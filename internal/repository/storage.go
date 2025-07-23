@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/JonnyShabli/EffectiveMobile/internal/models"
@@ -67,7 +68,14 @@ func (s *Storage) GetSub(ctx context.Context, log logster.Logger, subId string) 
 }
 
 func (s *Storage) UpdateSub(ctx context.Context, log logster.Logger, sub *models.Subscription) error {
-	builder := squirrel.Update("subscriptions").
+	var count int
+	sqlstringSelect := `
+		SELECT COUNT(*) 
+		FROM subscriptions 
+		WHERE sub_id = $1 AND deleted_at IS NULL
+		`
+
+	builderUpdate := squirrel.Update("subscriptions").
 		Set("service_name", sub.Service_name).
 		Set("price", sub.Price).
 		Set("user_id", sub.User_id).
@@ -76,14 +84,47 @@ func (s *Storage) UpdateSub(ctx context.Context, log logster.Logger, sub *models
 		Set("deleted_at", sub.Deleted_at).
 		Where(squirrel.Eq{"sub_id": sub.Sub_id})
 
-	sqlstring, args, err := builder.PlaceholderFormat(squirrel.Dollar).ToSql()
+	sqlstringUpdate, argsUpdate, err := builderUpdate.PlaceholderFormat(squirrel.Dollar).ToSql()
 	if err != nil {
 		return err
 	}
 
-	log.WithField("sql", sqlstring).Infof("executing query")
+	log.Infof("begin transaction")
+	tx, err := s.db.Beginx()
+	if err != nil {
+		return err
+	}
+	log.WithField("sql", sqlstringSelect).WithField("args", sub.Sub_id).Infof("executing query")
+	err = tx.QueryRowxContext(ctx, sqlstringSelect, sub.Sub_id).Scan(&count)
+	if err != nil {
+		errTx := tx.Rollback()
+		if errTx != nil {
+			return errTx
+		}
+		return err
+	}
 
-	_, err = s.db.ExecContext(ctx, sqlstring, args...)
+	if count != 1 {
+		errtx := tx.Rollback()
+		if errtx != nil {
+			return errtx
+		}
+	}
+
+	fmt.Println(sqlstringUpdate, argsUpdate)
+
+	log.WithField("sql", sqlstringUpdate).WithField("args", argsUpdate).Infof("executing query")
+	_, err = tx.ExecContext(ctx, sqlstringUpdate, argsUpdate...)
+	if err != nil {
+		err = tx.Rollback()
+		if err != nil {
+			return err
+		}
+		return err
+	}
+
+	log.Infof("commiting transaction")
+	err = tx.Commit()
 	if err != nil {
 		return err
 	}

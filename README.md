@@ -15,7 +15,8 @@
 - docker compose up
 
 # Make commands
-    - make swagger-gen - генерации OpenApi документации;
+   - make swagger-gen - генерации OpenApi документации;
 
 # Не реализовано
-    Нет валидации входных данных
+   - Нет валидации входных данных
+   - Нет тестов
